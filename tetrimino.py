@@ -61,7 +61,7 @@ class Tetrimino:
         for r_i, row in enumerate(self.BOARD):
             for c_i, val in enumerate(row):
                 if val:
-                    b = Block(c_i, r_i, block_px, self.COLOR)
+                    b = Block(c_i, r_i, 20, self.COLOR)
                     self.group.add(b)
 
     def can_move_by(self, cols, rows):

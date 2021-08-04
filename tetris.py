@@ -36,10 +36,6 @@ class BoardSprite(pg.sprite.Sprite):
 def main():
     screen = pg.display.set_mode(SCREENRECT.size)
     clock = pg.time.Clock()
-    #    sprites = pg.sprite.Group()
-    # row = 0
-    # col = 0
-    # block = tetrimino.Block(col, row, 10, tetrimino.colors[1])
     group = pg.sprite.Group()
     tet = tetrimino.J(**BOARD)
     board_sprite = BoardSprite(**BOARD)
