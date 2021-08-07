@@ -11,15 +11,17 @@ if not pg.get_init():
 SCREENRECT = pg.Rect(0, 0, 720, 1280)
 BOARD_COLS = 10
 BOARD_ROWS = 20
+BLOCK_PX_SIDE = 20
 BOARD = {
-    "cells": [[0] * BOARD_COLS] * BOARD_ROWS,
+    # "cells": [[0] * BOARD_COLS] * BOARD_ROWS,
     "cols": BOARD_COLS,
     "rows": BOARD_ROWS,
-    "rect": pg.Rect(10, 10, SCREENRECT.width * 0.75, SCREENRECT.height * 0.95),
+    "block_px_side": BLOCK_PX_SIDE,
+    "rect": pg.Rect(10, 10, BLOCK_PX_SIDE * BOARD_COLS, BLOCK_PX_SIDE * BOARD_ROWS),
     "cell_sprites": [[None] * BOARD_COLS] * BOARD_ROWS,
     "color": (0, 0, 0),
 }
-
+FPS = 60
 
 class BoardSprite(pg.sprite.Sprite):
     def __init__(self, **board) -> None:
@@ -33,6 +35,19 @@ class BoardSprite(pg.sprite.Sprite):
         pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
 
 
+def handle_key_up(event, tetrimino):
+    pass
+
+def handle_key_down(event, tetrimino):
+    
+
+
+event_handlers = {
+    pg.KEYDOWN: handle_key_down,
+    pg.KEYUP: handle_key_up,
+}
+
+
 def main():
     screen = pg.display.set_mode(SCREENRECT.size)
     clock = pg.time.Clock()
@@ -42,21 +57,22 @@ def main():
     group.add(board_sprite)
 
     while True:
-        clock.tick(1)
         if tet.can_move_by(0, 1):
-            tet.update(0, 1)
+            tet.move_by(0, 1)
         else:
             print("tet can't move there")
 
+        for event in pg.event.get():
+            event_handlers[event.type](event, tetrimino)
+
         screen.fill(tetrimino.colors[0])
         group.draw(screen)
+        tet.update()
         tet.draw(screen)
 
         pg.display.flip()
+        clock.tick(FPS)
 
-
-def rotate(tetrimino):
-    pass
 
 
 if __name__ == "__main__":

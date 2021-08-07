@@ -27,46 +27,37 @@ class Block(pg.sprite.Sprite):
     def get_board_pos(self):
         return self.board_pos
 
-    def update(self, cols, rows):
+    def move_by(self, cols, rows):
         self.board_pos[0] += cols
         self.board_pos[1] += rows
-        self.rect = self.rect.move(cols * self.width, rows * self.width)
-        # self.rect = pg.Rect(
-        # board_col * self.width,
-        # self.board_pos[1] + board_row * self.width,
-        # self.width,
-        # self.width,
-        # )
 
-    # def draw(self, surface):
-    # pg.draw.rect(surface, self.color, self.rect)
+    def update(self):
+        self.rect = pg.Rect(
+            self.board_pos[0] * self.width,
+            self.board_pos[1] * self.width,
+            self.width,
+            self.width,
+        )
 
 
 class Tetrimino:
     BOARD = []
-    BLOCK_PX_WIDTH = 10
     COLOR = colors[1]
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, init_col, init_row, *args, **kwargs) -> None:
         self.group = pg.sprite.Group()
         self.board_args = kwargs
+        self.create_blocks(init_col, init_row, **kwargs)
 
-        self.create_blocks(**kwargs)
-
-    def create_blocks(self, **kwargs):
-        board_rect = kwargs["rect"]
-        board_cols = kwargs["cols"]
-        board_rows = kwargs["rows"]
-        block_px = int(board_rect.height / board_rows) # TODO: this isn't right
+    def create_blocks(self, init_col, init_row, **kwargs):
+        block_px = kwargs["block_px_side"]
         for r_i, row in enumerate(self.BOARD):
             for c_i, val in enumerate(row):
                 if val:
-                    b = Block(c_i, r_i, 20, self.COLOR)
+                    b = Block(c_i + init_col, r_i + init_row, block_px, self.COLOR)
                     self.group.add(b)
 
     def can_move_by(self, cols, rows):
-        board_rows = self.board_args["rows"]
-        board_cols = self.board_args["cols"]
         board_sprites = self.board_args["cell_sprites"]
 
         def hits(b):
@@ -83,8 +74,12 @@ class Tetrimino:
 
         return bool([b for b in self.group.sprites() if not hits(b)])
 
-    def update(self, cols, rows):
-        self.group.update(cols, rows)
+    def move_by(self, cols, rows):
+        for b in self.group.sprites():
+            b.move_by(cols, rows)
+
+    def update(self):
+        self.group.update()
 
     def draw(self, surface):
         self.group.draw(surface)
@@ -118,8 +113,8 @@ class L(Tetrimino):
     ]
     COLOR = colors[3]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
 class O(Tetrimino):
@@ -129,8 +124,8 @@ class O(Tetrimino):
     ]
     COLOR = colors[4]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
 class S(Tetrimino):
@@ -140,8 +135,8 @@ class S(Tetrimino):
     ]
     COLOR = colors[5]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
 class T(Tetrimino):
@@ -151,8 +146,8 @@ class T(Tetrimino):
     ]
     COLOR = colors[6]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
 class Z(Tetrimino):
@@ -162,5 +157,5 @@ class Z(Tetrimino):
     ]
     COLOR = colors[7]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
