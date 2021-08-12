@@ -22,6 +22,8 @@ BOARD = {
     "color": (0, 0, 0),
 }
 FPS = 60
+DOWN_SPEED_MS = 1000
+
 
 class BoardSprite(pg.sprite.Sprite):
     def __init__(self, **board) -> None:
@@ -35,16 +37,30 @@ class BoardSprite(pg.sprite.Sprite):
         pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
 
 
-def handle_key_up(event, tetrimino):
-    pass
+def move_right(tetrimino):
+    if tetrimino.can_move_by(1, 0):
+        tetrimino.move_by(1, 0)
 
-def handle_key_down(event, tetrimino):
-    
+
+def move_left(tetrimino):
+    if tetrimino.can_move_by(-1, 0):
+        tetrimino.move_by(-1, 0)
+
+
+def move_down(tetrimino):
+    if tetrimino.can_move_by(0, 1):
+        tetrimino.move_by(0, 1)
+
+
+def rotate_clockwise(tetrimino):
+    pass
 
 
 event_handlers = {
-    pg.KEYDOWN: handle_key_down,
-    pg.KEYUP: handle_key_up,
+    pg.K_d: move_right,
+    pg.K_a: move_left,
+    pg.K_s: move_down,
+    pg.K_w: rotate_clockwise,
 }
 
 
@@ -52,18 +68,23 @@ def main():
     screen = pg.display.set_mode(SCREENRECT.size)
     clock = pg.time.Clock()
     group = pg.sprite.Group()
-    tet = tetrimino.J(**BOARD)
+    tet = tetrimino.J(1, 1, **BOARD)
     board_sprite = BoardSprite(**BOARD)
     group.add(board_sprite)
 
+    # initial_key_repeat_delay_ms = 1000
+    # key_repeat_delay_ms = 500
+    # pygame.key.set_repeat(initial_key_repeat_delay_ms, key_repeat_delay_ms)
+    since_last_move = 0
     while True:
-        if tet.can_move_by(0, 1):
-            tet.move_by(0, 1)
-        else:
-            print("tet can't move there")
+        if since_last_move > DOWN_SPEED_MS:
+            since_last_move = 0
+            move_down(tet)
 
-        for event in pg.event.get():
-            event_handlers[event.type](event, tetrimino)
+        for ev in pg.event.get():
+            if ev.type == pg.KEYDOWN:
+                if func := event_handlers.get(ev.key, None):
+                    func(tet)
 
         screen.fill(tetrimino.colors[0])
         group.draw(screen)
@@ -71,8 +92,7 @@ def main():
         tet.draw(screen)
 
         pg.display.flip()
-        clock.tick(FPS)
-
+        since_last_move += clock.tick(FPS)
 
 
 if __name__ == "__main__":

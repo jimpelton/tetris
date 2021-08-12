@@ -44,10 +44,13 @@ class Tetrimino:
     BOARD = []
     COLOR = colors[1]
 
-    def __init__(self, init_col, init_row, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         self.group = pg.sprite.Group()
         self.board_args = kwargs
-        self.create_blocks(init_col, init_row, **kwargs)
+        ic = args[0]
+        ir = args[1]
+        self.create_blocks(ic, ir, **kwargs
+        )
 
     def create_blocks(self, init_col, init_row, **kwargs):
         block_px = kwargs["block_px_side"]
@@ -64,7 +67,10 @@ class Tetrimino:
             pos = b.get_board_pos()
             new_col = pos[0] + cols
             new_row = pos[1] + rows
-            print(f"New Col: {new_col}, New Row: {new_row}")
+            print(f"Col: {pos[0]} --> {new_col}, Row: {pos[1]} --> {new_row}")
+
+            if new_col < 0 or new_row < 0:
+                return False
 
             try:
                 return bool(board_sprites[new_row][new_col])
@@ -72,7 +78,9 @@ class Tetrimino:
                 # we hit the wall of the board
                 return True
 
-        return bool([b for b in self.group.sprites() if not hits(b)])
+        can_move = all([not hits(b) for b in self.group.sprites()])
+        print(can_move)
+        return can_move
 
     def move_by(self, cols, rows):
         for b in self.group.sprites():
