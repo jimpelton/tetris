@@ -13,13 +13,12 @@ BOARD_COLS = 10
 BOARD_ROWS = 20
 BLOCK_PX_SIDE = 20
 BOARD = {
-    # "cells": [[0] * BOARD_COLS] * BOARD_ROWS,
     "cols": BOARD_COLS,
     "rows": BOARD_ROWS,
     "block_px_side": BLOCK_PX_SIDE,
-    "rect": pg.Rect(10, 10, BLOCK_PX_SIDE * BOARD_COLS, BLOCK_PX_SIDE * BOARD_ROWS),
-    "cell_sprites": [[None] * BOARD_COLS] * BOARD_ROWS,
     "color": (0, 0, 0),
+    "cell_sprites": [[None] * BOARD_COLS] * BOARD_ROWS,
+    "rect": pg.Rect(10, 10, BLOCK_PX_SIDE * BOARD_COLS, BLOCK_PX_SIDE * BOARD_ROWS),
 }
 FPS = 60
 DOWN_SPEED_MS = 1000
@@ -37,62 +36,87 @@ class BoardSprite(pg.sprite.Sprite):
         pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
 
 
-def move_right(tetrimino):
-    if tetrimino.can_move_by(1, 0):
-        tetrimino.move_by(1, 0)
+class Board:
+    def __init__(self, **board) -> None:
+        self.board_sprite = BoardSprite(**board)
+        self.group = pg.sprite.Group()
+        self.group.add(self.board_sprite)
+
+    def draw(self, surface):
+        self.group.draw(surface)
 
 
-def move_left(tetrimino):
-    if tetrimino.can_move_by(-1, 0):
-        tetrimino.move_by(-1, 0)
+class Tetris:
+    initial_key_repeat_delay_ms = 500
+    key_repeat_delay_ms = 100
 
+    def __init__(self) -> None:
+        self.screen = pg.display.set_mode(SCREENRECT.size)
+        self.clock = pg.time.Clock()
+        self.board = Board(**BOARD)
 
-def move_down(tetrimino):
-    if tetrimino.can_move_by(0, 1):
-        tetrimino.move_by(0, 1)
+        self.since_last_down_move = 0
 
+        self.event_handlers = {
+            pg.K_d: self.move_right,
+            pg.K_a: self.move_left,
+            pg.K_s: self.move_down,
+            pg.K_w: self.rotate_clockwise,
+            pg.KEYDOWN: self.handle_key_down,
+            pg.KEYUP: self.handle_key_up,
+        }
 
-def rotate_clockwise(tetrimino):
-    pass
+    def move_right(self, tetrimino):
+        if tetrimino.can_move_by(1, 0):
+            tetrimino.move_by(1, 0)
 
+    def move_left(self, tetrimino):
+        if tetrimino.can_move_by(-1, 0):
+            tetrimino.move_by(-1, 0)
 
-event_handlers = {
-    pg.K_d: move_right,
-    pg.K_a: move_left,
-    pg.K_s: move_down,
-    pg.K_w: rotate_clockwise,
-}
+    def move_down(self, tetrimino):
+        if tetrimino.can_move_by(0, 1):
+            tetrimino.move_by(0, 1)
+        self.since_last_down_move = 0
 
+    def rotate_clockwise(self, tetrimino):
+        tetrimino.rotate_clockwise()
+
+    def handle_key_down(self, ev, tet):
+        if func := self.event_handlers.get(ev.key, None):
+            func(tet)
+
+    def handle_key_up(self, ev, tet):
+        pass
+
+    def next_tet(self):
+        return tetrimino.J(1, 1, **BOARD)
+
+    def loop(self):
+        pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
+        tet = self.next_tet()
+
+        while True:
+            if self.since_last_down_move > DOWN_SPEED_MS:
+                self.move_down(tet)
+
+            for ev in pg.event.get():
+                if ev.type == pg.QUIT:
+                    return
+                if func := self.event_handlers.get(ev.type, None):
+                    func(ev, tet)
+
+            self.screen.fill(tetrimino.colors[0])
+            self.board.draw(self.screen)
+            tet.update()
+            tet.draw(self.screen)
+
+            pg.display.flip()
+            self.since_last_down_move += self.clock.tick(FPS)
 
 def main():
-    screen = pg.display.set_mode(SCREENRECT.size)
-    clock = pg.time.Clock()
-    group = pg.sprite.Group()
-    tet = tetrimino.J(1, 1, **BOARD)
-    board_sprite = BoardSprite(**BOARD)
-    group.add(board_sprite)
-
-    # initial_key_repeat_delay_ms = 1000
-    # key_repeat_delay_ms = 500
-    # pygame.key.set_repeat(initial_key_repeat_delay_ms, key_repeat_delay_ms)
-    since_last_move = 0
-    while True:
-        if since_last_move > DOWN_SPEED_MS:
-            since_last_move = 0
-            move_down(tet)
-
-        for ev in pg.event.get():
-            if ev.type == pg.KEYDOWN:
-                if func := event_handlers.get(ev.key, None):
-                    func(tet)
-
-        screen.fill(tetrimino.colors[0])
-        group.draw(screen)
-        tet.update()
-        tet.draw(screen)
-
-        pg.display.flip()
-        since_last_move += clock.tick(FPS)
+    tetris = Tetris()
+    tetris.loop()
 
 
 if __name__ == "__main__":
