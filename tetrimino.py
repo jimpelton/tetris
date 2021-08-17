@@ -1,5 +1,6 @@
 import pygame as pg
 import copy
+import random
 
 colors = [
     (0, 0, 0),
@@ -26,7 +27,7 @@ class Block(pg.sprite.Sprite):
         self.image.fill(color)
 
     def get_board_pos(self):
-        return {"col": self.board_pos[0], "row": self.board_pos[1] }
+        return {"col": self.board_pos[0], "row": self.board_pos[1]}
 
     def set_board_pos(self, col, row):
         self.board_pos[0] = col
@@ -91,7 +92,6 @@ class Tetrimino:
             # print(f"Col: {pos["col"]} --> {new_col}, Row: {pos["row"]} --> {new_row}")
             return self.check_collision(new_col, new_row)
 
-
         can_move = all([not hits(b) for b in self.group.sprites()])
         # print(can_move)
         return can_move
@@ -112,7 +112,7 @@ class Tetrimino:
                         new_col = self.board_col + c
                         new_row = self.board_row + r
                         # print(f"Col: {blk.get_board_pos()["col"]} --> "
-                              # f"{new_col}, Row: {blk.get_board_pos()["row"]} --> {new_row}")
+                        # f"{new_col}, Row: {blk.get_board_pos()["row"]} --> {new_row}")
                         if self.check_collision(new_col, new_row):
                             return False
             return True
@@ -220,3 +220,13 @@ class Z(Tetrimino):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+
+
+_tets = [
+    I, J, L, O, S, T, Z
+]
+
+
+def random_tetrimino(icol, irow, **board):
+    n = int(random.randrange(0, len(_tets)))
+    return _tets[n](icol, irow, **board)
