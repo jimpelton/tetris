@@ -26,7 +26,7 @@ class Block(pg.sprite.Sprite):
         self.image.fill(color)
 
     def get_board_pos(self):
-        return self.board_pos
+        return {"col": self.board_pos[0], "row": self.board_pos[1] }
 
     def set_board_pos(self, col, row):
         self.board_pos[0] = col
@@ -54,6 +54,7 @@ class Tetrimino:
         self.board_args = kwargs
         self.board_col = args[0]
         self.board_row = args[1]
+        self.alive = True
         self.shape = self.create_blocks(self.board_col, self.board_row, **kwargs)
 
     def create_blocks(self, init_col, init_row, **kwargs):
@@ -85,9 +86,9 @@ class Tetrimino:
     def can_move_by(self, cols, rows):
         def hits(b):
             pos = b.get_board_pos()
-            new_col = pos[0] + cols
-            new_row = pos[1] + rows
-            # print(f"Col: {pos[0]} --> {new_col}, Row: {pos[1]} --> {new_row}")
+            new_col = pos["col"] + cols
+            new_row = pos["row"] + rows
+            # print(f"Col: {pos["col"]} --> {new_col}, Row: {pos["row"]} --> {new_row}")
             return self.check_collision(new_col, new_row)
 
 
@@ -110,8 +111,8 @@ class Tetrimino:
                         # calc new board location for this block
                         new_col = self.board_col + c
                         new_row = self.board_row + r
-                        # print(f"Col: {blk.get_board_pos()[0]} --> "
-                              # f"{new_col}, Row: {blk.get_board_pos()[1]} --> {new_row}")
+                        # print(f"Col: {blk.get_board_pos()["col"]} --> "
+                              # f"{new_col}, Row: {blk.get_board_pos()["row"]} --> {new_row}")
                         if self.check_collision(new_col, new_row):
                             return False
             return True
@@ -137,6 +138,12 @@ class Tetrimino:
 
     def draw(self, surface):
         self.group.draw(surface)
+
+    def set_alive(self, b):
+        self.alive = b
+
+    def is_alive(self):
+        return self.alive
 
 
 class I(Tetrimino):
