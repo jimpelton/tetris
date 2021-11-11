@@ -45,6 +45,13 @@ class Block(pg.sprite.Sprite):
             self.width,
         )
 
+    @property
+    def col(self):
+        return self.board_pos[0]
+
+    @property
+    def row(self):
+        return self.board_pos[1]
 
 class Tetrimino:
     BOARD = []

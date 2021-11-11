@@ -46,6 +46,9 @@ class Board:
     def draw(self, surface):
         self.group.draw(surface)
 
+    def update(self):
+        self.group.update()
+
     def take_blocks(self, tetrimino):
         print("taking blocks")
         # pdb.set_trace()
@@ -59,7 +62,7 @@ class Board:
         tetrimino.group.remove(group_sprites)
         print("taking blocks done")
 
-    def find_and_kill_rows(self):
+    def find_and_kill_lines(self):
         dead_rows = []
         for row in self.cell_sprites[::-1]:
             if all(row):
@@ -75,15 +78,17 @@ class Board:
             self.cell_sprites.insert(0, [None for i in range(len(row))])
 
         # update each block's cell position so it matches the board
-        for ri, row in enumerate(self.cell_sprites):
-
-
+        if dead_rows:
+            for ri, row in enumerate(self.cell_sprites):
+                for block in row:
+                    if block:
+                        block.set_board_pos(col=block.col, row=ri)
 
         return len(dead_rows)
 
 class Tetris:
     initial_key_repeat_delay_ms = 100
-    key_repeat_delay_ms = 50 
+    key_repeat_delay_ms = 50
 
     def __init__(self, screen) -> None:
         self.screen = screen
@@ -161,6 +166,7 @@ class Tetris:
                     func(ev, tet)
 
             self.screen.fill(tetrimino.colors[0])
+            self.board.update()
             self.board.draw(self.screen)
             tet.update()
             tet.draw(self.screen)
