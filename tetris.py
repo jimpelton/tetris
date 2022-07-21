@@ -1,5 +1,7 @@
 from sys import exit
-import random
+from typing import ClassVar
+from enum import Enum, unique
+
 import pygame as pg
 from pygame.locals import *
 
@@ -86,9 +88,34 @@ class Board:
 
         return len(dead_rows)
 
+
+@unique
+class MoveNames(Enum):
+    DOWN = auto()
+    UP = auto()
+    LEFT = auto()
+    RIGHT = auto()
+
+class Keyboard:
+    
+    def __init__(self) -> None:
+        self.since_move_events = {
+            MoveNames.DOWN: 0.0,    
+            MoveNames.UP: 0.0,    
+            MoveNames.LEFT: 0.0,    
+            MoveNames.RIGHT: 0.0,    
+        }
+
+    def update_time(self, move: MoveNames, tm: float):
+        prev = self.since_move_events[move]
+        self.since_move_events[move] = tm - prev
+
+    def clear_time(self, move: MoveNames):
+        self.since_move_events[move] = 0.0
+
 class Tetris:
-    initial_key_repeat_delay_ms = 100
-    key_repeat_delay_ms = 50
+    initial_key_repeat_delay_ms: ClassVar[int] = 100
+    key_repeat_delay_ms: ClassVar[int] = 50
 
     def __init__(self, screen) -> None:
         self.screen = screen
@@ -106,25 +133,25 @@ class Tetris:
             pg.KEYUP: self.handle_key_up,
         }
 
+
     def copy_tetrimino_to_board(self, tetrimino):
         self.board.take_blocks(tetrimino)
         tetrimino.set_alive(False)
         lines_found = self.board.find_and_kill_lines()
         print(f"found {lines_found} lines")
 
-
     def move_right(self, tetrimino):
-        pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
+        # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
         if tetrimino.can_move_by(1, 0):
             tetrimino.move_by(1, 0)
 
     def move_left(self, tetrimino):
-        pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
+        # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
         if tetrimino.can_move_by(-1, 0):
             tetrimino.move_by(-1, 0)
 
     def move_down(self, tetrimino):
-        pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
+        # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
         if tetrimino.can_move_by(0, 1):
             tetrimino.move_by(0, 1)
             self.since_last_down_move = 0
@@ -136,11 +163,14 @@ class Tetris:
         tetrimino.rotate_clockwise()
 
     def handle_key_down(self, ev, tet):
+        print("key down event")
+        # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
         if func := self.event_handlers.get(ev.key, None):
             func(tet)
 
     def handle_key_up(self, ev, tet):
-        pg.key.set_repeat(0)
+        # pg.key.set_repeat(0)
+        # pass
 
     def next_tet(self):
         return tetrimino.random_tetrimino(0, 0, **BOARD)
@@ -183,6 +213,7 @@ def init_pygame():
 
     screen = pg.display.set_mode(SCREENRECT.size)
     pg.display.set_caption("Tetris")
+    pg.key.set_repeat(100, 50)
 
     return screen
 
