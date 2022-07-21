@@ -5,14 +5,10 @@ description = "A Tetris Game"
 authors = ["Jim Pelton <james.s.pelton@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-pygame = "2.0.1"
+python = "^3.10"
+pygame = "*"
 
 [tool.poetry.dev-dependencies]
-black = "^21.7b0"
-isort = "^5.9.2"
-flake9 = "^3.8.3"
-neovim = "^0.3.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
