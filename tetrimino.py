@@ -1,8 +1,12 @@
+from dataclasses import dataclass
+from typing import ClassVar, Final, List, Tuple
 import pygame as pg
 import copy
 import random
 
-colors = [
+from board import BoardArgs
+
+colors: Final[List[Tuple[int, int, int]]] = [
     (0, 0, 0),
     (255, 85, 85),
     (100, 200, 115),
@@ -15,10 +19,16 @@ colors = [
 ]
 
 
+@dataclass
+class BoardPos:
+    col: int
+    row: int
+
+
 class Block(pg.sprite.Sprite):
-    def __init__(self, board_col, board_row, width, color) -> None:
+    def __init__(self, board_col: int, board_row: int, width: int, color: Tuple[int, int, int]) -> None:
         super().__init__()
-        self.board_pos = [board_col, board_row]
+        self.board_pos = BoardPos(board_col, board_row)
         self.width = width
         self.color = color
         # use the board-relative x, y (col, row)
@@ -26,53 +36,60 @@ class Block(pg.sprite.Sprite):
         self.image = pg.Surface([width, width])
         self.image.fill(color)
 
-    def get_board_pos(self):
-        return {"col": self.board_pos[0], "row": self.board_pos[1]}
+    def get_board_pos(self) -> BoardPos:
+        return self.board_pos
 
-    def set_board_pos(self, col, row):
-        self.board_pos[0] = col
-        self.board_pos[1] = row
+    def set_board_pos(self, col: int, row: int):
+        self.board_pos.col = col
+        self.board_pos.row = row
 
-    def move_by(self, cols, rows):
-        self.board_pos[0] += cols
-        self.board_pos[1] += rows
+    def move_by(self, cols: int, rows: int):
+        self.board_pos.col += cols
+        self.board_pos.row += rows
 
     def update(self):
         self.rect = pg.Rect(
-            self.board_pos[0] * self.width,
-            self.board_pos[1] * self.width,
+            self.board_pos.col * self.width,
+            self.board_pos.row * self.width,
             self.width,
             self.width,
         )
 
     @property
-    def col(self):
-        return self.board_pos[0]
+    def col(self) -> int:
+        return self.board_pos.col
 
     @property
-    def row(self):
-        return self.board_pos[1]
+    def row(self) -> int:
+        return self.board_pos.row
+
 
 class Tetrimino:
-    BOARD = []
-    COLOR = colors[1]
+    # the description of this tetrimino
+    BOARD: ClassVar[List[List[int]]] = []
+    # the color of this tetrimino
+    COLOR: Tuple[int, int, int] = colors[1]
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, board_args: BoardArgs) -> None:
         self.group = pg.sprite.Group()
-        self.board_args = kwargs
+        self.board_args = board_args
         self.board_col = args[0]
         self.board_row = args[1]
+        # whether or not this Tetrimino is movable over the Board
         self.alive = True
-        self.shape = self.create_blocks(self.board_col, self.board_row, **kwargs)
+        self.shape = self._create_blocks(self.board_col, self.board_row, board_args)
 
-    def create_blocks(self, init_col, init_row, **kwargs):
-        block_px = kwargs["block_px_side"]
+    def _create_blocks(self, init_col, init_row, board_args: BoardArgs):
+        block_px = board_args.block_pixels_side
         shape = copy.deepcopy(self.BOARD)
+
+        # create a block where self.BOARD has a 1 in it, otherwise None
         for r_i, row in enumerate(self.BOARD):
             for c_i, val in enumerate(row):
                 if val:
                     b = Block(c_i + init_col, r_i + init_row, block_px, self.COLOR)
                     self.group.add(b)
+                    # this is weird, because we are overwriting the int type with a Block
                     shape[r_i][c_i] = b
                 else:
                     shape[r_i][c_i] = None
@@ -112,6 +129,7 @@ class Tetrimino:
 
     def rotate_clockwise(self):
         def rotate_okay(shape):
+            """Return true if this shape can rotate, or False if there is something in the way"""
             for r, row in enumerate(shape):
                 for c, blk in enumerate(row):
                     if blk:
@@ -234,6 +252,6 @@ _tets = [
 ]
 
 
-def random_tetrimino(icol, irow, **board):
+def random_tetrimino(icol: int, irow: int, board_args: BoardArgs):
     n = int(random.randrange(0, len(_tets)))
-    return _tets[n](icol, irow, **board)
+    return _tets[n](icol, irow, board_args)

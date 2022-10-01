@@ -1,92 +1,33 @@
+import dataclasses
 from sys import exit
-from typing import ClassVar
-from enum import Enum, unique
+from typing import Callable, ClassVar, Dict
+from enum import Enum, auto, unique
 
 import pygame as pg
 from pygame.locals import *
+from board import Board, BoardArgs
 
 import tetrimino
 
 
 SCREENRECT = pg.Rect(0, 0, 720, 1280)
-BOARD_COLS = 10
-BOARD_ROWS = 20
-BLOCK_PX_SIDE = 20
-BOARD = {
-    "cols": BOARD_COLS,
-    "rows": BOARD_ROWS,
-    "block_px_side": BLOCK_PX_SIDE,
-    "color": (0, 0, 0),
-    "cell_sprites": [[None for i in range(BOARD_COLS)] for j in range(BOARD_ROWS)],
-    "rect": pg.Rect(10, 10, BLOCK_PX_SIDE * BOARD_COLS, BLOCK_PX_SIDE * BOARD_ROWS),
-}
 FPS = 60
 DOWN_SPEED_MS = 1000
 
-import pdb
+_BOARD_COLS = 10
+_BOARD_ROWS = 20
+_BLOCK_PX_SIDE = 20
+_BOARD_DEFAULTS = {
+    "n_cols": _BOARD_COLS,
+    "n_rows": _BOARD_ROWS,
+    "block_px_side": _BLOCK_PX_SIDE,
+    "color": (0, 0, 0),
+    "cell_sprites": [[None for i in range(_BOARD_COLS)] for j in range(_BOARD_ROWS)],
+    "rect": pg.Rect(10, 10, _BLOCK_PX_SIDE * _BOARD_COLS, _BLOCK_PX_SIDE * _BOARD_ROWS),
+}
 
+board_args = dataclasses.replace(BoardArgs, **_BOARD_DEFAULTS)
 
-class BoardSprite(pg.sprite.Sprite):
-    def __init__(self, **board) -> None:
-        super().__init__()
-        self.board = board
-
-        self.image = pg.Surface((board["rect"].width, board["rect"].height))
-        self.image.fill(board["color"])
-        self.rect = self.image.get_rect()
-
-        pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
-
-
-class Board:
-    def __init__(self, **board) -> None:
-        self.board_sprite = BoardSprite(**board)
-        self.group = pg.sprite.Group()
-        self.group.add(self.board_sprite)
-        self.cell_sprites = board["cell_sprites"]
-
-    def draw(self, surface):
-        self.group.draw(surface)
-
-    def update(self):
-        self.group.update()
-
-    def take_blocks(self, tetrimino):
-        print("taking blocks")
-        # pdb.set_trace()
-        group_sprites = tetrimino.group.sprites()
-        for b in group_sprites:
-            pos = b.get_board_pos()
-            self.cell_sprites[pos["row"]][pos["col"]] = b
-
-        # add these two the group so we can have pygame manage them
-        self.group.add(group_sprites)
-        tetrimino.group.remove(group_sprites)
-        print("taking blocks done")
-
-    def find_and_kill_lines(self):
-        dead_rows = []
-        for row in self.cell_sprites[::-1]:
-            if all(row):
-                print("found dead row")
-                dead_rows.append(row)
-
-        for row in dead_rows:
-            for b in row:
-                b.kill()
-            # remove this row from cell_sprites
-            self.cell_sprites.remove(row)
-            # pre-pend a new row to cell_sprites
-            self.cell_sprites.insert(0, [None for i in range(len(row))])
-
-        # update each block's cell position so it matches the board
-        if dead_rows:
-            for ri, row in enumerate(self.cell_sprites):
-                for block in row:
-                    if block:
-                        block.set_board_pos(col=block.col, row=ri)
-
-        return len(dead_rows)
 
 
 @unique
@@ -97,13 +38,12 @@ class MoveNames(Enum):
     RIGHT = auto()
 
 class Keyboard:
-    
     def __init__(self) -> None:
         self.since_move_events = {
-            MoveNames.DOWN: 0.0,    
-            MoveNames.UP: 0.0,    
-            MoveNames.LEFT: 0.0,    
-            MoveNames.RIGHT: 0.0,    
+            MoveNames.DOWN: 0.0,
+            MoveNames.UP: 0.0,
+            MoveNames.LEFT: 0.0,
+            MoveNames.RIGHT: 0.0,
         }
 
     def update_time(self, move: MoveNames, tm: float):
@@ -117,14 +57,14 @@ class Tetris:
     initial_key_repeat_delay_ms: ClassVar[int] = 100
     key_repeat_delay_ms: ClassVar[int] = 50
 
-    def __init__(self, screen) -> None:
+    def __init__(self, screen, board_args) -> None:
         self.screen = screen
         self.clock = pg.time.Clock()
-        self.board = Board(**BOARD)
+        self.board = Board(board_args)
 
         self.since_last_down_move = 0
 
-        self.event_handlers = {
+        self.event_handlers: Dict[int, Callable[[tetrimino.Tetrimino], None]] = {
             pg.K_d: self.move_right,
             pg.K_a: self.move_left,
             pg.K_s: self.move_down,
@@ -170,10 +110,10 @@ class Tetris:
 
     def handle_key_up(self, ev, tet):
         # pg.key.set_repeat(0)
-        # pass
+        pass
 
     def next_tet(self):
-        return tetrimino.random_tetrimino(0, 0, **BOARD)
+        return tetrimino.random_tetrimino(0, 0, board_args)
 
     def loop(self):
         tet = self.next_tet()
