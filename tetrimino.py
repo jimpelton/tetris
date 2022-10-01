@@ -26,7 +26,9 @@ class BoardPos:
 
 
 class Block(pg.sprite.Sprite):
-    def __init__(self, board_col: int, board_row: int, width: int, color: Tuple[int, int, int]) -> None:
+    def __init__(
+        self, board_col: int, board_row: int, width: int, color: Tuple[int, int, int]
+    ) -> None:
         super().__init__()
         self.board_pos = BoardPos(board_col, board_row)
         self.width = width
@@ -70,14 +72,14 @@ class Tetrimino:
     # the color of this tetrimino
     COLOR: Tuple[int, int, int] = colors[1]
 
-    def __init__(self, *args, board_args: BoardArgs) -> None:
+    def __init__(self, pos: BoardPos, board_args: BoardArgs) -> None:
         self.group = pg.sprite.Group()
         self.board_args = board_args
-        self.board_col = args[0]
-        self.board_row = args[1]
+        self.pos = pos
+
         # whether or not this Tetrimino is movable over the Board
         self.alive = True
-        self.shape = self._create_blocks(self.board_col, self.board_row, board_args)
+        self.shape = self._create_blocks(pos.col, pos.row, board_args)
 
     def _create_blocks(self, init_col, init_row, board_args: BoardArgs):
         block_px = board_args.block_pixels_side
@@ -101,7 +103,7 @@ class Tetrimino:
         if col < 0 or row < 0:
             return True
 
-        board_sprites = self.board_args["cell_sprites"]
+        board_sprites = self.board_args.cell_sprites
         try:
             return bool(board_sprites[row][col])
         except IndexError:
@@ -124,8 +126,8 @@ class Tetrimino:
         for b in self.group.sprites():
             b.move_by(cols, rows)
 
-        self.board_row += rows
-        self.board_col += cols
+        self.pos.row += rows
+        self.pos.col += cols
 
     def rotate_clockwise(self):
         def rotate_okay(shape):
@@ -134,8 +136,8 @@ class Tetrimino:
                 for c, blk in enumerate(row):
                     if blk:
                         # calc new board location for this block
-                        new_col = self.board_col + c
-                        new_row = self.board_row + r
+                        new_col = self.pos.col + c
+                        new_row = self.pos.row + r
                         # print(f"Col: {blk.get_board_pos()["col"]} --> "
                         # f"{new_col}, Row: {blk.get_board_pos()["row"]} --> {new_row}")
                         if self.check_collision(new_col, new_row):
@@ -153,9 +155,9 @@ class Tetrimino:
             for r, row in enumerate(shape):
                 for c, blk in enumerate(row):
                     if blk:
-                        new_col = self.board_col + c
-                        new_row = self.board_row + r
-                        blk.set_board_pos(new_col, new_row)
+                        new_col = self.pos.col + c
+                        new_row = self.pos.row + r
+                        blk.set_board_pos(BoardPos(col=new_col, row=new_row))
             self.shape = shape
 
     def update(self):
@@ -177,9 +179,6 @@ class I(Tetrimino):
     ]
     COLOR = colors[1]
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
 
 class J(Tetrimino):
     BOARD = [
@@ -187,9 +186,6 @@ class J(Tetrimino):
         [1, 1, 1],
     ]
     COLOR = colors[2]
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
 
 
 class L(Tetrimino):
@@ -199,9 +195,6 @@ class L(Tetrimino):
     ]
     COLOR = colors[3]
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
 
 class O(Tetrimino):
     BOARD = [
@@ -209,9 +202,6 @@ class O(Tetrimino):
         [1, 1],
     ]
     COLOR = colors[4]
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
 
 
 class S(Tetrimino):
@@ -221,9 +211,6 @@ class S(Tetrimino):
     ]
     COLOR = colors[5]
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
 
 class T(Tetrimino):
     BOARD = [
@@ -231,9 +218,6 @@ class T(Tetrimino):
         [1, 1, 1],
     ]
     COLOR = colors[6]
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
 
 
 class Z(Tetrimino):
@@ -243,15 +227,10 @@ class Z(Tetrimino):
     ]
     COLOR = colors[7]
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
 
-
-_tets = [
-    I, J, L, O, S, T, Z
-]
+_tets = [I, J, L, O, S, T, Z]
 
 
 def random_tetrimino(icol: int, irow: int, board_args: BoardArgs):
     n = int(random.randrange(0, len(_tets)))
-    return _tets[n](icol, irow, board_args)
+    return _tets[n](BoardPos(col=icol, row=irow), board_args)

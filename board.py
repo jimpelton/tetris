@@ -1,7 +1,7 @@
-
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from typing import List, Tuple
 import pygame as pg
+
 
 @dataclass
 class BoardArgs:
@@ -9,12 +9,13 @@ class BoardArgs:
     n_rows: int
     block_pixels_side: int
     board_color: Tuple[int, int, int]
-    cell_sprites: List[None | pg.sprite.Sprite]
+    cell_sprites: List[List[None | pg.sprite.Sprite]]
     rect: pg.Rect
 
 
 class BoardSprite(pg.sprite.Sprite):
     """Represents image of the Board on the screen"""
+
     def __init__(self, board_args) -> None:
         super().__init__()
         self.board_args = board_args
@@ -76,4 +77,3 @@ class Board:
                         block.set_board_pos(col=block.col, row=ri)
 
         return len(dead_rows)
-
