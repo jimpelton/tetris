@@ -7,8 +7,8 @@ import pygame as pg
 class BoardArgs:
     n_cols: int
     n_rows: int
-    block_pixels_side: int
-    board_color: Tuple[int, int, int]
+    block_px_side: int
+    color: Tuple[int, int, int]
     cell_sprites: List[List[None | pg.sprite.Sprite]]
     rect: pg.Rect
 
@@ -56,7 +56,7 @@ class Board:
 
     def find_and_kill_lines(self):
         dead_rows = []
-        for row in self.cell_sprites[::-1]:
+        for row in self.board_args.cell_sprites[::-1]:
             if all(row):
                 print("found dead row")
                 dead_rows.append(row)
@@ -65,15 +65,15 @@ class Board:
             for b in row:
                 b.kill()
             # remove this row from cell_sprites
-            self.cell_sprites.remove(row)
+            self.board_args.cell_sprites.remove(row)
             # pre-pend a new row to cell_sprites
-            self.cell_sprites.insert(0, [None for i in range(len(row))])
+            self.board_args.cell_sprites.insert(0, [None for i in range(len(row))])
 
         # update each block's cell position so it matches the board
         if dead_rows:
-            for ri, row in enumerate(self.cell_sprites):
+            for ri, row in enumerate(self.board_args.cell_sprites):
                 for block in row:
                     if block:
-                        block.set_board_pos(col=block.col, row=ri)
+                        block.set_board_pos(col=block.board_pos.col, row=ri)
 
         return len(dead_rows)

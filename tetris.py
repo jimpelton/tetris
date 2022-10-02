@@ -26,7 +26,7 @@ _BOARD_DEFAULTS = {
     "rect": pg.Rect(10, 10, _BLOCK_PX_SIDE * _BOARD_COLS, _BLOCK_PX_SIDE * _BOARD_ROWS),
 }
 
-board_args = dataclasses.replace(BoardArgs, **_BOARD_DEFAULTS)
+# board_args = dataclasses.replace(BoardArgs, **_BOARD_DEFAULTS)
 
 
 
@@ -60,6 +60,7 @@ class Tetris:
     def __init__(self, screen, board_args) -> None:
         self.screen = screen
         self.clock = pg.time.Clock()
+        self.board_args = board_args
         self.board = Board(board_args)
 
         self.since_last_down_move = 0
@@ -72,7 +73,6 @@ class Tetris:
             pg.KEYDOWN: self.handle_key_down,
             pg.KEYUP: self.handle_key_up,
         }
-
 
     def copy_tetrimino_to_board(self, tetrimino):
         self.board.take_blocks(tetrimino)
@@ -113,7 +113,7 @@ class Tetris:
         pass
 
     def next_tet(self):
-        return tetrimino.random_tetrimino(0, 0, board_args)
+        return tetrimino.random_tetrimino(0, 0, self.board_args)
 
     def loop(self):
         tet = self.next_tet()
@@ -160,7 +160,8 @@ def init_pygame():
 
 def main():
     scrn = init_pygame()
-    tetris = Tetris(scrn)
+    board_args = BoardArgs(**_BOARD_DEFAULTS)
+    tetris = Tetris(screen=scrn, board_args=board_args)
     tetris.loop()
     exit(0)
 

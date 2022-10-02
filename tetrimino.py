@@ -19,10 +19,10 @@ colors: Final[List[Tuple[int, int, int]]] = [
 ]
 
 
-@dataclass
 class BoardPos:
-    col: int
-    row: int
+    def __init__(self, col, row) -> None:
+        self.col: int = col
+        self.row: int = row
 
 
 class Block(pg.sprite.Sprite):
@@ -79,13 +79,14 @@ class Tetrimino:
 
         # whether or not this Tetrimino is movable over the Board
         self.alive = True
-        self.shape = self._create_blocks(pos.col, pos.row, board_args)
+        self.shape: List[List[Block | None]] = self._create_blocks(pos.col, pos.row, board_args)
 
     def _create_blocks(self, init_col, init_row, board_args: BoardArgs):
-        block_px = board_args.block_pixels_side
+        block_px = board_args.block_px_side
         shape = copy.deepcopy(self.BOARD)
 
         # create a block where self.BOARD has a 1 in it, otherwise None
+        # overwrite the shape
         for r_i, row in enumerate(self.BOARD):
             for c_i, val in enumerate(row):
                 if val:
@@ -113,8 +114,8 @@ class Tetrimino:
     def can_move_by(self, cols, rows):
         def hits(b):
             pos = b.get_board_pos()
-            new_col = pos["col"] + cols
-            new_row = pos["row"] + rows
+            new_col = pos.col + cols
+            new_row = pos.row + rows
             # print(f"Col: {pos["col"]} --> {new_col}, Row: {pos["row"]} --> {new_row}")
             return self.check_collision(new_col, new_row)
 
@@ -157,7 +158,7 @@ class Tetrimino:
                     if blk:
                         new_col = self.pos.col + c
                         new_row = self.pos.row + r
-                        blk.set_board_pos(BoardPos(col=new_col, row=new_row))
+                        blk.set_board_pos(col=new_col, row=new_row)
             self.shape = shape
 
     def update(self):
