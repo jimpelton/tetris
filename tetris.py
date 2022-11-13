@@ -1,16 +1,14 @@
-import dataclasses
 from sys import exit
 from typing import Callable, ClassVar, Dict
-from enum import Enum, auto, unique
 
 import pygame as pg
 from pygame.locals import *
-from board import Board, BoardArgs
+from lib import Board, BoardArgs
 
-import tetrimino
+from lib import tetrimino
 
 
-SCREENRECT = pg.Rect(0, 0, 720, 1280)
+SCREENRECT = pg.Rect(0, 0, 720, 720)
 FPS = 60
 DOWN_SPEED_MS = 1000
 
@@ -28,30 +26,6 @@ _BOARD_DEFAULTS = {
 
 # board_args = dataclasses.replace(BoardArgs, **_BOARD_DEFAULTS)
 
-
-
-@unique
-class MoveNames(Enum):
-    DOWN = auto()
-    UP = auto()
-    LEFT = auto()
-    RIGHT = auto()
-
-class Keyboard:
-    def __init__(self) -> None:
-        self.since_move_events = {
-            MoveNames.DOWN: 0.0,
-            MoveNames.UP: 0.0,
-            MoveNames.LEFT: 0.0,
-            MoveNames.RIGHT: 0.0,
-        }
-
-    def update_time(self, move: MoveNames, tm: float):
-        prev = self.since_move_events[move]
-        self.since_move_events[move] = tm - prev
-
-    def clear_time(self, move: MoveNames):
-        self.since_move_events[move] = 0.0
 
 class Tetris:
     initial_key_repeat_delay_ms: ClassVar[int] = 100
@@ -151,7 +125,7 @@ def init_pygame():
         print("oh no! pygame not init'd")
         exit(1)
 
-    screen = pg.display.set_mode(SCREENRECT.size)
+    screen = pg.display.set_mode(SCREENRECT.size, pg.RESIZABLE)
     pg.display.set_caption("Tetris")
     pg.key.set_repeat(100, 50)
 

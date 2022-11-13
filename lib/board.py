@@ -26,7 +26,6 @@ class BoardSprite(pg.sprite.Sprite):
 
         pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
 
-
 class Board:
     def __init__(self, board_args: BoardArgs) -> None:
         self.board_args = board_args
