@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Final, List, Tuple
+from typing import ClassVar, Final, List, Tuple, Type
 import pygame as pg
 import copy
 import random
@@ -65,6 +65,8 @@ class Block(pg.sprite.Sprite):
     def row(self) -> int:
         return self.board_pos.row
 
+
+Shape = Type[List[List[int]]]
 
 class Tetrimino:
     # the description of this tetrimino
