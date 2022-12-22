@@ -76,7 +76,7 @@ class Tetrimino:
 
     def __init__(self, pos: BoardPos, board_args: BoardArgs) -> None:
         self.group = pg.sprite.Group()
-        self.board_args = board_args
+        self.board_args: BoardArgs = board_args
         self.pos = pos
 
         # whether or not this Tetrimino is movable over the Board

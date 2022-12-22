@@ -24,9 +24,6 @@ _BOARD_DEFAULTS = {
     "rect": pg.Rect(10, 10, _BLOCK_PX_SIDE * _BOARD_COLS, _BLOCK_PX_SIDE * _BOARD_ROWS),
 }
 
-# board_args = dataclasses.replace(BoardArgs, **_BOARD_DEFAULTS)
-
-
 class Tetris:
     initial_key_repeat_delay_ms: ClassVar[int] = 100
     key_repeat_delay_ms: ClassVar[int] = 50
@@ -40,12 +37,16 @@ class Tetris:
         self.since_last_down_move = 0
 
         self.event_handlers: Dict[int, Callable[[tetrimino.Tetrimino], None]] = {
+            pg.KEYDOWN: self.handle_key_down,
+            pg.KEYUP: self.handle_key_up,
+            # pg.VIDEORESIZE: self.handle_video_resize,
+        }
+
+        self.key_event_handlers: Dict[int, Callable] = {
             pg.K_d: self.move_right,
             pg.K_a: self.move_left,
             pg.K_s: self.move_down,
             pg.K_w: self.rotate_clockwise,
-            pg.KEYDOWN: self.handle_key_down,
-            pg.KEYUP: self.handle_key_up,
         }
 
     def copy_tetrimino_to_board(self, tetrimino):
@@ -79,11 +80,14 @@ class Tetris:
     def handle_key_down(self, ev, tet):
         print("key down event")
         # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
-        if func := self.event_handlers.get(ev.key, None):
+        if func := self.key_event_handlers.get(ev.key, None):
             func(tet)
 
     def handle_key_up(self, ev, tet):
         # pg.key.set_repeat(0)
+        pass
+
+    def handle_resize_event(self, ev, tet):
         pass
 
     def next_tet(self):
