@@ -68,9 +68,10 @@ class Block(pg.sprite.Sprite):
 
 Shape = Type[List[List[int]]]
 
+
 class Tetrimino:
     # the description of this tetrimino
-    BOARD: ClassVar[List[List[int]]] = []
+    BOARD: ClassVar[Shape] = []
     # the color of this tetrimino
     COLOR: Tuple[int, int, int] = colors[1]
 

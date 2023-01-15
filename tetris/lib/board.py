@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Final
 import pygame as pg
 
 from .boad_args import BoardArgs
@@ -20,9 +20,14 @@ class BoardSprite(pg.sprite.Sprite):
 
 class Board:
     def __init__(self, board_args: BoardArgs) -> None:
-        self.board_args = board_args
+        self.board_args: Final[BoardArgs] = board_args
         self.board_sprite = BoardSprite(board_args=board_args)
+        # blocks that are not part of a tet anymore. after a tetrimino has
+        # been deemed unable to move down anymore it's blocks are copied into
+        # this group.
         self.frozen_blocks_group = pg.sprite.Group()
+        # the group also has the boardsprite rectangular outline in it...
+        # TODO: rename frozen_blocks_group to more appropriate name
         self.frozen_blocks_group.add(self.board_sprite)
 
     def draw(self, surface):
