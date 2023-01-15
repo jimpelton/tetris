@@ -4,7 +4,7 @@ import pygame as pg
 import copy
 import random
 
-from .board import BoardArgs
+from .boad_args import BoardArgs
 
 colors: Final[List[Tuple[int, int, int]]] = [
     (0, 0, 0),

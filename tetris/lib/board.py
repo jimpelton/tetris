@@ -2,27 +2,19 @@ from dataclasses import dataclass
 from typing import List, Tuple
 import pygame as pg
 
-
-@dataclass
-class BoardArgs:
-    n_cols: int
-    n_rows: int
-    block_px_side: int
-    color: Tuple[int, int, int]
-    cell_sprites: List[List[None | pg.sprite.Sprite]]
-    rect: pg.Rect
+from .boad_args import BoardArgs
 
 
 class BoardSprite(pg.sprite.Sprite):
     """Represents image of the Board on the screen"""
 
-    def __init__(self, board_args) -> None:
+    def __init__(self, board_args: BoardArgs) -> None:
         super().__init__()
         self.board_args = board_args
 
-        self.image = pg.Surface((board_args.rect.width, board_args.rect.height))
+        self.image: pg.Surface = pg.Surface((board_args.rect.width, board_args.rect.height))
         self.image.fill(board_args.color)
-        self.rect = self.image.get_rect()
+        self.rect: pg.Rect = self.image.get_rect()
 
         pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
 
@@ -30,14 +22,14 @@ class Board:
     def __init__(self, board_args: BoardArgs) -> None:
         self.board_args = board_args
         self.board_sprite = BoardSprite(board_args=board_args)
-        self.group = pg.sprite.Group()
-        self.group.add(self.board_sprite)
+        self.frozen_blocks_group = pg.sprite.Group()
+        self.frozen_blocks_group.add(self.board_sprite)
 
     def draw(self, surface):
-        self.group.draw(surface)
+        self.frozen_blocks_group.draw(surface)
 
     def update(self):
-        self.group.update()
+        self.frozen_blocks_group.update()
 
     def take_blocks(self, tetrimino):
         print("taking blocks")
@@ -49,7 +41,7 @@ class Board:
             self.board_args.cell_sprites[pos.row][pos.col] = b
 
         # add these two the group so we can have pygame manage them
-        self.group.add(group_sprites)
+        self.frozen_blocks_group.add(group_sprites)
         tetrimino.group.remove(group_sprites)
         print("taking blocks done")
 
