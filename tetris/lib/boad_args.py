@@ -3,7 +3,8 @@ from typing import Tuple, List
 
 import pygame as pg
 
-@dataclass
+
+@dataclass(frozen=True)
 class BoardArgs:
     n_cols: int
     n_rows: int
