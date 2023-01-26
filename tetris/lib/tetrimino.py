@@ -1,10 +1,12 @@
 from dataclasses import dataclass
-from typing import ClassVar, Final, List, Tuple, Type
+from typing import ClassVar, Final, List, Tuple, Type, TypeAlias
 import pygame as pg
 import copy
 import random
 
 from .boad_args import BoardArgs
+from .board_pos import BoardPos
+from .block import Block
 
 colors: Final[List[Tuple[int, int, int]]] = [
     (0, 0, 0),
@@ -19,59 +21,12 @@ colors: Final[List[Tuple[int, int, int]]] = [
 ]
 
 
-class BoardPos:
-    def __init__(self, col, row) -> None:
-        self.col: int = col
-        self.row: int = row
-
-
-class Block(pg.sprite.Sprite):
-    def __init__(
-        self, board_col: int, board_row: int, width: int, color: Tuple[int, int, int]
-    ) -> None:
-        super().__init__()
-        self.board_pos = BoardPos(board_col, board_row)
-        self.width = width
-        self.color = color
-        # use the board-relative x, y (col, row)
-        self.rect = pg.Rect(board_col * width, board_row * width, width, width)
-        self.image = pg.Surface([width, width])
-        self.image.fill(color)
-
-    def get_board_pos(self) -> BoardPos:
-        return self.board_pos
-
-    def set_board_pos(self, col: int, row: int):
-        self.board_pos.col = col
-        self.board_pos.row = row
-
-    def move_by(self, cols: int, rows: int):
-        self.board_pos.col += cols
-        self.board_pos.row += rows
-
-    def update(self):
-        self.rect = pg.Rect(
-            self.board_pos.col * self.width,
-            self.board_pos.row * self.width,
-            self.width,
-            self.width,
-        )
-
-    @property
-    def col(self) -> int:
-        return self.board_pos.col
-
-    @property
-    def row(self) -> int:
-        return self.board_pos.row
-
-
-Shape = Type[List[List[int]]]
+Shape: TypeAlias = List[List[int]]
 
 
 class Tetrimino:
     # the description of this tetrimino
-    BOARD: ClassVar[Shape] = []
+    DESCRIPTION: ClassVar[Shape]
     # the color of this tetrimino
     COLOR: Tuple[int, int, int] = colors[1]
 
@@ -86,11 +41,11 @@ class Tetrimino:
 
     def _create_blocks(self, init_col, init_row, board_args: BoardArgs):
         block_px = board_args.block_px_side
-        shape = copy.deepcopy(self.BOARD)
+        shape = copy.deepcopy(self.DESCRIPTION)
 
         # create a block where self.BOARD has a 1 in it, otherwise None
         # overwrite the shape
-        for r_i, row in enumerate(self.BOARD):
+        for r_i, row in enumerate(self.DESCRIPTION):
             for c_i, val in enumerate(row):
                 if val:
                     b = Block(c_i + init_col, r_i + init_row, block_px, self.COLOR)
@@ -178,14 +133,14 @@ class Tetrimino:
 
 
 class I(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [1, 1, 1, 1],
     ]
     COLOR = colors[1]
 
 
 class J(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [1, 0, 0],
         [1, 1, 1],
     ]
@@ -193,7 +148,7 @@ class J(Tetrimino):
 
 
 class L(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [0, 0, 1],
         [1, 1, 1],
     ]
@@ -201,7 +156,7 @@ class L(Tetrimino):
 
 
 class O(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [1, 1],
         [1, 1],
     ]
@@ -209,7 +164,7 @@ class O(Tetrimino):
 
 
 class S(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [0, 1, 1],
         [1, 1, 0],
     ]
@@ -217,7 +172,7 @@ class S(Tetrimino):
 
 
 class T(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [0, 1, 0],
         [1, 1, 1],
     ]
@@ -225,7 +180,7 @@ class T(Tetrimino):
 
 
 class Z(Tetrimino):
-    BOARD = [
+    DESCRIPTION = [
         [1, 1, 0],
         [0, 1, 1],
     ]
