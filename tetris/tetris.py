@@ -19,7 +19,7 @@ _BOARD_DEFAULTS = {
     "n_rows": _BOARD_ROWS,
     "block_px_side": _BLOCK_PX_SIDE,
     "color": (0, 0, 0),
-    "cell_sprites": [[None for i in range(_BOARD_COLS)] for j in range(_BOARD_ROWS)],
+    "cell_sprites": [[None for _ in range(_BOARD_COLS)] for _ in range(_BOARD_ROWS)],
     "rect": pg.Rect(10, 10, _BLOCK_PX_SIDE * _BOARD_COLS, _BLOCK_PX_SIDE * _BOARD_ROWS),
 }
 
@@ -28,15 +28,15 @@ class Tetris:
     initial_key_repeat_delay_ms: ClassVar[int] = 100
     key_repeat_delay_ms: ClassVar[int] = 50
 
-    def __init__(self, screen: pg.display, board_args: BoardArgs) -> None:
-        self.screen: pg.display = screen
+    def __init__(self, screen: pg.surface.Surface, board_args: BoardArgs) -> None:
+        self.screen: pg.surface.Surface = screen
         self.clock: pg.time.Clock = pg.time.Clock()
         self.board_args: BoardArgs = board_args
         self.board: Board = Board(board_args)
 
         self.since_last_down_move: float = 0
 
-        self.event_handlers: Dict[int, Callable[[tetrimino.Tetrimino], None]] = {
+        self.event_handlers: Dict[int, Callable[[pg.event.Event, tetrimino.Tetrimino], None]] = {
             pg.KEYDOWN: self.handle_key_down,
             pg.KEYUP: self.handle_key_up,
             # pg.VIDEORESIZE: self.handle_video_resize,
@@ -77,17 +77,17 @@ class Tetris:
     def rotate_clockwise(self, tet: tetrimino.Tetrimino):
         tet.rotate_clockwise()
 
-    def handle_key_down(self, ev, tet: tetrimino.Tetrimino):
+    def handle_key_down(self, ev: pg.event.Event, tet: tetrimino.Tetrimino):
         print("key down event")
         # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
         if func := self.key_down_event_handlers.get(ev.key, None):
             func(tet)
 
-    def handle_key_up(self, ev, tet: tetrimino.Tetrimino):
+    def handle_key_up(self, ev: pg.event.Event, tet: tetrimino.Tetrimino):
         # pg.key.set_repeat(0)
         pass
 
-    def handle_resize_event(self, ev, tet:tetrimino.Tetrimino ):
+    def handle_resize_event(self, ev: pg.event.Event, tet:tetrimino.Tetrimino ):
         pass
 
     def next_tet(self):
@@ -119,13 +119,13 @@ class Tetris:
             self.since_last_down_move += self.clock.tick(FPS)
 
 
-def init_pygame() -> pg.display:
+def init_pygame() -> pg.surface.Surface:
     pg.init()
     if not pg.get_init():
         print("oh no! pygame not init'd")
         exit(1)
 
-    screen: pg.display = pg.display.set_mode(SCREENRECT.size, pg.RESIZABLE)
+    screen: pg.surface.Surface = pg.display.set_mode(SCREENRECT.size, pg.RESIZABLE)
     pg.display.set_caption("Tetris")
     pg.key.set_repeat(100, 50)
 
@@ -133,7 +133,7 @@ def init_pygame() -> pg.display:
 
 
 def main():
-    scrn: pg.display = init_pygame()
+    scrn: pg.surface.Surface = init_pygame()
     board_args: BoardArgs = BoardArgs(**_BOARD_DEFAULTS)
     tetris = Tetris(screen=scrn, board_args=board_args)
     tetris.loop()
