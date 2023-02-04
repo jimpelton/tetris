@@ -9,10 +9,9 @@ python = "^3.10"
 pygame = "*"
 
 [tool.poetry.dev-dependencies]
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^0.981"
-black = "^22.8.0"
+mypy = "*"
+isort = "*"
+black = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
