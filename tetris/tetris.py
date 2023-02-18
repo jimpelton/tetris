@@ -1,5 +1,6 @@
 from sys import exit
-from typing import Callable, ClassVar, Dict
+from typing import Callable, ClassVar, Dict,  Final
+import logging
 
 import pygame as pg
 from pygame.locals import *
@@ -7,21 +8,13 @@ from lib import Board, BoardArgs
 
 from lib import tetrimino
 
-SCREENRECT = pg.Rect(0, 0, 720, 720)
-FPS = 60
-DOWN_SPEED_MS = 1000
 
-_BOARD_COLS = 10
-_BOARD_ROWS = 20
-_BLOCK_PX_SIDE = 20
-_BOARD_DEFAULTS = {
-    "n_cols": _BOARD_COLS,
-    "n_rows": _BOARD_ROWS,
-    "block_px_side": _BLOCK_PX_SIDE,
-    "color": (0, 0, 0),
-    "cell_sprites": [[None for _ in range(_BOARD_COLS)] for _ in range(_BOARD_ROWS)],
-    "rect": pg.Rect(10, 10, _BLOCK_PX_SIDE * _BOARD_COLS, _BLOCK_PX_SIDE * _BOARD_ROWS),
-}
+logger = None
+
+SCREENRECT: Final = pg.Rect(0, 0, 720, 720)
+FPS: Final = 60
+DOWN_SPEED_MS: Final = 1000
+
 
 
 class Tetris:
@@ -47,13 +40,15 @@ class Tetris:
             pg.K_a: self.move_left,
             pg.K_s: self.move_down,
             pg.K_w: self.rotate_clockwise,
+            pg.K_SPACE: self.drop_piece,
+            pg.K_ESCAPE: self.quit,
         }
 
     def copy_tetrimino_to_board(self, tet: tetrimino.Tetrimino):
         self.board.take_blocks(tet)
         tet.set_alive(False)
         lines_found = self.board.find_and_kill_lines()
-        print(f"found {lines_found} lines")
+        logger.debug("Found %s lines", lines_found)
 
     def move_right(self, tet: tetrimino.Tetrimino):
         # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
@@ -71,14 +66,19 @@ class Tetris:
             tet.move_by(0, 1)
             self.since_last_down_move = 0
         else:
-            print("tet couldn't move")
+            logger.debug("Tet couldn't move")
             self.copy_tetrimino_to_board(tet)
 
     def rotate_clockwise(self, tet: tetrimino.Tetrimino):
         tet.rotate_clockwise()
 
+    def drop_piece(self, tet: tetrimino.Tetrimino):
+        while tet.can_move_by(0, 1):
+            logger.debug("dropping piece")
+            tet.move_by(0, 1)
+
     def handle_key_down(self, ev: pg.event.Event, tet: tetrimino.Tetrimino):
-        print("key down event")
+        logger.debug("key down event")
         # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
         if func := self.key_down_event_handlers.get(ev.key, None):
             func(tet)
@@ -92,6 +92,9 @@ class Tetris:
 
     def next_tet(self):
         return tetrimino.random_tetrimino(0, 0, self.board_args)
+
+    def quit(self, _: tetrimino.Tetrimino):
+        pg.event.post(pg.event.Event(pg.QUIT))
 
     def loop(self):
         tet = self.next_tet()
@@ -131,10 +134,24 @@ def init_pygame() -> pg.surface.Surface:
 
     return screen
 
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action="store_true", help="print debug logeroos")
+
+    return parser.parse_args()
 
 def main():
+    args = parse_args()
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    
+    global logger
+    logger = logging.getLogger(__name__)
+
     scrn: pg.surface.Surface = init_pygame()
-    board_args: BoardArgs = BoardArgs(**_BOARD_DEFAULTS)
+    board_args: BoardArgs = BoardArgs.make_default()
     tetris = Tetris(screen=scrn, board_args=board_args)
     tetris.loop()
     exit(0)
