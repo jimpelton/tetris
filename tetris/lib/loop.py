@@ -1,4 +1,5 @@
 # from sys import exit
+from dataclasses import dataclass
 from typing import Callable, ClassVar, Dict,  Final
 import logging
 
@@ -11,9 +12,24 @@ from . import tetrimino, Board, BoardArgs, Keyboard, MoveNames
 
 logger = logging.getLogger(__name__)
 
-FPS = 60
-DOWN_SPEED_MS = 1000
+FPS: Final[int] = 60
+DEFAULT_DOWN_SPEED_MS: Final[int] = 1000
 
+@dataclass
+class Score:
+    total_lines: int = 0
+    level: int = 0
+    points: int = 0
+
+    def add_lines(self, n: int) -> int:
+        """Add n lines to the total and compute score.
+
+        Returns total lines
+        """
+        self.total_lines += n
+        self.level = int((self.total_lines / 10)) + 1
+        self.points += self.level * n
+        return self.total_lines
 
 
 class Tetris:
@@ -26,8 +42,10 @@ class Tetris:
         self.board_args: BoardArgs = board_args
         self.board: Board = Board(board_args)
         self.keyboard: Keyboard = Keyboard()
+        self.score = Score()
 
         self.since_last_down_move: float = 0
+        self.down_speed_delay_ms: int = DEFAULT_DOWN_SPEED_MS
 
         # self.event_handlers: Dict[int, Callable[[pg.event.Event, tetrimino.Tetrimino], None]] = {
         #     pg.KEYDOWN: self.handle_key_down,
@@ -43,11 +61,12 @@ class Tetris:
             MoveNames.DROP: self.drop_piece,
         }
 
-    def copy_tetrimino_to_board(self, tet: tetrimino.Tetrimino):
+    def finalize_tetrimino_score(self, tet: tetrimino.Tetrimino):
         self.board.take_blocks(tet)
         tet.set_alive(False)
         lines_found = self.board.find_and_kill_lines()
-        logger.debug("Found %s lines", lines_found)
+        self.score.add_lines(lines_found)
+        logger.debug("Found %s lines, \n\t Score: %s", lines_found, self.score)
 
     def move_right(self, tet: tetrimino.Tetrimino):
         # pg.key.set_repeat(self.initial_key_repeat_delay_ms, self.key_repeat_delay_ms)
@@ -66,7 +85,7 @@ class Tetris:
             self.since_last_down_move = 0
         else:
             logger.debug("Tet couldn't move")
-            self.copy_tetrimino_to_board(tet)
+            self.finalize_tetrimino_score(tet)
 
     def rotate_clockwise(self, tet: tetrimino.Tetrimino):
         tet.rotate_clockwise()
@@ -92,7 +111,8 @@ class Tetris:
     def next_tet(self):
         return tetrimino.random_tetrimino(0, 0, self.board_args)
 
-    def should_quit(self, ev: pg.event.Event):
+    @staticmethod
+    def should_quit(ev: pg.event.Event):
         return ev.type == pg.QUIT or (ev.type == pg.KEYDOWN and ev.key == pg.K_ESCAPE)
 
     def loop(self):
@@ -105,7 +125,7 @@ class Tetris:
             if not tet.is_alive():
                 tet = self.next_tet()
 
-            if self.since_last_down_move > DOWN_SPEED_MS:
+            if self.since_last_down_move > self.down_speed_delay_ms:
                 self.move_down(tet)
 
             for ev in pg.event.get():
