@@ -52,11 +52,10 @@ class Keyboard(event_handler.EventHandler):
         if ev.key not in KEY_MAP:
             return
 
-
         key = KEY_MAP[ev.key]
         
         if key in self.not_repeatable_keys:
-            # check if eligable to register as a press
+            # check if eligible to register as a press
             if key not in self.key_was_down_previously:
                 self.key_was_down_previously.add(key)
                 self._keys_down.add(key)

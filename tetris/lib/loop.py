@@ -92,8 +92,8 @@ class Tetris:
     def next_tet(self):
         return tetrimino.random_tetrimino(0, 0, self.board_args)
 
-    def quit(self, _: tetrimino.Tetrimino):
-        pg.event.post(pg.event.Event(pg.QUIT))
+    def should_quit(self, ev: pg.event.Event):
+        return ev.type == pg.QUIT or (ev.type == pg.KEYDOWN and ev.key == pg.K_ESCAPE)
 
     def loop(self):
         tet = self.next_tet()
@@ -109,12 +109,11 @@ class Tetris:
                 self.move_down(tet)
 
             for ev in pg.event.get():
-                if ev.type == pg.QUIT:
-                    pg.quit()
+                if self.should_quit(ev):
                     return
+
                 self.keyboard.on_event(ev, game_time)
             
-
             keys_down = self.keyboard.keys_down
             for k in keys_down:
                 if func := self.key_down_event_handlers.get(k):

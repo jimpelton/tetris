@@ -48,6 +48,7 @@ def main():
     board_args: BoardArgs = BoardArgs.make_default()
     tetris = Tetris(screen=scrn, board_args=board_args)
     tetris.loop()
+    pg.quit()
     sys.exit(0)
 
 
