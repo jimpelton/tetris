@@ -7,3 +7,5 @@ class MoveNames(Enum):
     UP = auto()
     LEFT = auto()
     RIGHT = auto()
+    ROTATE = auto()
+    DROP = auto()
