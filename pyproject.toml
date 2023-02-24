@@ -5,7 +5,7 @@ description = "A Tetris Game"
 authors = ["Jim Pelton <james.s.pelton@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pygame = "*"
 
 [tool.poetry.dev-dependencies]
