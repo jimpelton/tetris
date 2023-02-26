@@ -62,10 +62,12 @@ class Tetris:
         }
 
     def finalize_tetrimino_score(self, tet: tetrimino.Tetrimino):
+        """Finalize the tet and compute the score and new down speed delay."""
         self.board.take_blocks(tet)
         tet.set_alive(False)
         lines_found = self.board.find_and_kill_lines()
         self.score.add_lines(lines_found)
+        # self.down_speed_delay_ms =
         logger.debug("Found %s lines, \n\t Score: %s", lines_found, self.score)
 
     def move_right(self, tet: tetrimino.Tetrimino):
