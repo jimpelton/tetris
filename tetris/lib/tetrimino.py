@@ -38,9 +38,9 @@ class Tetrimino:
 
         # whether or not this Tetrimino is movable over the Board
         self.alive = True
-        self.shape: List[List[Block | None]] = self._create_blocks(pos.col, pos.row, board_args)
+        self.shape: Shape = self._create_blocks(pos.col, pos.row, board_args)
 
-    def _create_blocks(self, init_col, init_row, board_args: BoardArgs):
+    def _create_blocks(self, init_col, init_row, board_args: BoardArgs) -> Shape:
         block_px = board_args.block_px_side
         shape = copy.deepcopy(self.DESCRIPTION)
 
