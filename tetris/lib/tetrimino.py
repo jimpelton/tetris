@@ -21,7 +21,7 @@ colors: Final[List[Tuple[int, int, int]]] = [
 ]
 
 
-Shape: TypeAlias = List[List[int]]
+Shape: TypeAlias = List[List[int | None | Block]]  # woa! weird types there, yo!
 
 
 class Tetrimino:
