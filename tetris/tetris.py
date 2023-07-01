@@ -10,9 +10,10 @@ from lib import BoardArgs, Tetris
 
 logger = None
 
-SCREENRECT: Final = pg.Rect(0, 0, 720, 720)
-FPS: Final = 60
-DOWN_SPEED_MS: Final = 1000
+_SCREENRECT: Final[pg.Rect] = pg.Rect(0, 0, 720, 720)
+
+# FPS: Final = 60
+# DOWN_SPEED_MS: Final = 1000
 
 
 def init_pygame() -> pg.surface.Surface:
@@ -21,7 +22,7 @@ def init_pygame() -> pg.surface.Surface:
         print("oh no! pygame not init'd")
         exit(1)
 
-    screen: pg.surface.Surface = pg.display.set_mode(SCREENRECT.size, pg.RESIZABLE)
+    screen: pg.surface.Surface = pg.display.set_mode(_SCREENRECT.size, pg.RESIZABLE)
     pg.display.set_caption("Tetris")
     pg.key.set_repeat(100, 50)
 
@@ -41,7 +42,7 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
-    
+
     global logger
     logger = logging.getLogger(__name__)
 
