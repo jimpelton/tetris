@@ -53,13 +53,13 @@ class Keyboard(event_handler.EventHandler):
             return
 
         key = KEY_MAP[ev.key]
-        
+
         if key in self.not_repeatable_keys:
             # check if eligible to register as a press
             if key not in self.key_was_down_previously:
                 self.key_was_down_previously.add(key)
                 self._keys_down.add(key)
-            
+
             return
 
         now = game_time
@@ -69,12 +69,11 @@ class Keyboard(event_handler.EventHandler):
             self.since_last_key_event[key] = 0.0
         else:
             self.since_last_key_event[key] = current_diff
-        
+
     def handle_key_up(self, ev: pg.event.Event, game_time: float):
         if ev.key not in KEY_MAP:
             return
-        
+
         key = KEY_MAP[ev.key]
         self.key_was_down_previously.discard(key)
         self.since_last_key_event[key] = 0.0
-
