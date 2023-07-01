@@ -30,9 +30,10 @@ class Tetrimino:
     # the color of this tetrimino
     COLOR: Tuple[int, int, int] = colors[1]
 
-    def __init__(self, pos: BoardPos, board_args: BoardArgs) -> None:
+    # def __init__(self, pos: BoardPos, board_args: BoardArgs) -> None:
+    def __init__(self, pos: BoardPos, ) -> None:
         self.group = pg.sprite.Group()
-        self.board_args: BoardArgs = board_args
+        # self.board_args: BoardArgs = board_args
         self.pos = pos
 
         # whether or not this Tetrimino is movable over the Board
@@ -57,29 +58,29 @@ class Tetrimino:
 
         return shape
 
-    def check_collision(self, col, row):
-        """Return true if a collision with board sides or filled cell"""
-        if col < 0 or row < 0:
-            return True
+    # def check_collision(self, col, row):
+    #     """Return true if a collision with board sides or filled cell"""
+    #     if col < 0 or row < 0:
+    #         return True
 
-        board_sprites = self.board_args.cell_sprites
-        try:
-            return bool(board_sprites[row][col])
-        except IndexError:
-            # we hit the wall of the board
-            return True
+    #     board_sprites = self.board_args.cell_sprites
+    #     try:
+    #         return bool(board_sprites[row][col])
+    #     except IndexError:
+    #         # we hit the wall of the board
+    #         return True
 
-    def can_move_by(self, cols, rows):
-        def hits(b):
-            pos = b.get_board_pos()
-            new_col = pos.col + cols
-            new_row = pos.row + rows
-            # print(f"Col: {pos["col"]} --> {new_col}, Row: {pos["row"]} --> {new_row}")
-            return self.check_collision(new_col, new_row)
+    # def can_move_by(self, cols, rows):
+    #     def hits(b):
+    #         pos = b.get_board_pos()
+    #         new_col = pos.col + cols
+    #         new_row = pos.row + rows
+    #         # print(f"Col: {pos["col"]} --> {new_col}, Row: {pos["row"]} --> {new_row}")
+    #         return self.check_collision(new_col, new_row)
 
-        can_move = all([not hits(b) for b in self.group.sprites()])
-        # print(can_move)
-        return can_move
+    #     can_move = all([not hits(b) for b in self.group.sprites()])
+    #     # print(can_move)
+    #     return can_move
 
     def move_by(self, cols, rows):
         for b in self.group.sprites():

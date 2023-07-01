@@ -3,6 +3,7 @@ from typing import List, Tuple, Final
 import pygame as pg
 
 from .boad_args import BoardArgs
+from .tetrimino import Tetrimino
 
 
 class BoardSprite(pg.sprite.Sprite):
@@ -17,6 +18,7 @@ class BoardSprite(pg.sprite.Sprite):
         self.rect: pg.Rect = self.image.get_rect()
 
         pg.draw.rect(self.image, (255, 255, 255), self.rect, width=1)
+
 
 
 class Board:
@@ -74,3 +76,29 @@ class Board:
                         block.set_board_pos(col=block.board_pos.col, row=ri)
 
         return len(dead_rows)
+
+
+    def can_tet_move_by(self, tet: Tetrimino, cols: int, rows: int):
+        """Return true if this tet can move position by cols and rows"""
+        def check_collision(col, row):
+            """Return true if a collision with board sides or filled cell"""
+            if col < 0 or row < 0:
+                return True
+
+            board_sprites = self.board_args.cell_sprites
+            try:
+                return bool(board_sprites[row][col])
+            except IndexError:
+                # we hit the wall of the board
+                return True
+
+        def hits(b):
+            pos = b.get_board_pos()
+            new_col = pos.col + cols
+            new_row = pos.row + rows
+            # print(f"Col: {pos["col"]} --> {new_col}, Row: {pos["row"]} --> {new_row}")
+            return check_collision(new_col, new_row)
+
+        can_move = all([not hits(b) for b in tet.group.sprites()])
+        # print(can_move)
+        return can_move
