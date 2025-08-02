@@ -1,18 +1,16 @@
-[tool.poetry]
-name = "tetris"
+[project]
+name = "tetris-git"
 version = "0.1.0"
-description = "A Tetris Game"
-authors = ["Jim Pelton <james.s.pelton@gmail.com>"]
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pygame>=2.6.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-pygame = "*"
-
-[tool.poetry.dev-dependencies]
-mypy = "*"
-isort = "*"
-black = "*"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "mypy>=1.17.1",
+]
