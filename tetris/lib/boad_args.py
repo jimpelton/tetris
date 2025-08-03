@@ -19,6 +19,7 @@ _BOARD_DEFAULTS = {
 
 @dataclass(frozen=True)
 class BoardArgs:
+    """Represents details/config about the board."""
     n_cols: int
     n_rows: int
     block_px_side: int
