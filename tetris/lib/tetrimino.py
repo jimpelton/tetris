@@ -6,7 +6,7 @@ import random
 
 from .boad_args import BoardArgs
 from .board_pos import BoardPos
-from .block import Block
+from .block import BlockSprite
 
 colors: Final[List[Tuple[int, int, int]]] = [
     (0, 0, 0),
@@ -21,7 +21,11 @@ colors: Final[List[Tuple[int, int, int]]] = [
 ]
 
 
-Shape: TypeAlias = List[List[int | None | Block]]  # woa! weird types there, yo!
+Shape: TypeAlias = List[List[int | None | BlockSprite]]  # woa! weird types there, yo!
+
+class TetriminoSprite(pg.sprite.Group):
+    ...
+
 
 
 class Tetrimino:
@@ -30,18 +34,20 @@ class Tetrimino:
     # the color of this tetrimino
     COLOR: Tuple[int, int, int] = colors[1]
 
-    # def __init__(self, pos: BoardPos, board_args: BoardArgs) -> None:
     def __init__(self, pos: BoardPos, ) -> None:
         self.group = pg.sprite.Group()
-        # self.board_args: BoardArgs = board_args
         self.pos = pos
 
         # whether or not this Tetrimino is movable over the Board
         self.alive = True
         self.shape: Shape = self._create_blocks(pos.col, pos.row, board_args)
 
-    def _create_blocks(self, init_col, init_row, board_args: BoardArgs) -> Shape:
-        block_px = board_args.block_px_side
+    def _create_blocks(self, init_col: int, init_row: int, block_px: int) -> Shape:
+        """
+        :init_col: the board column of the first block in the shape
+        :init_row: the board row of the first block in the shape
+        :block_px: the width of a single block in pixels
+        """
         shape = copy.deepcopy(self.DESCRIPTION)
 
         # create a block where self.BOARD has a 1 in it, otherwise None
@@ -49,7 +55,7 @@ class Tetrimino:
         for r_i, row in enumerate(self.DESCRIPTION):
             for c_i, val in enumerate(row):
                 if val:
-                    b = Block(c_i + init_col, r_i + init_row, block_px, self.COLOR)
+                    b = BlockSprite(c_i + init_col, r_i + init_row, block_px, self.COLOR)
                     self.group.add(b)
                     # this is weird, because we are overwriting the int type with a Block
                     shape[r_i][c_i] = b

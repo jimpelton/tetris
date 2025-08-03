@@ -4,17 +4,17 @@ import pygame as pg
 
 from .board_pos import BoardPos
 
-class Block(pg.sprite.Sprite):
+class BlockSprite(pg.sprite.Sprite):
     def __init__(
-        self, board_col: int, board_row: int, width: int, color: Tuple[int, int, int]
+        self, board_col: int, board_row: int, width_px: int, color: Tuple[int, int, int]
     ) -> None:
         super().__init__()
         self.board_pos = BoardPos(board_col, board_row)
-        self.width = width
+        self.width = width_px
         self.color = color
         # use the board-relative x, y (col, row)
-        self.rect = pg.Rect(board_col * width, board_row * width, width, width)
-        self.image = pg.Surface([width, width])
+        self.rect = pg.Rect(board_col * width_px, board_row * width_px, width_px, width_px)
+        self.image = pg.Surface([width_px, width_px])
         self.image.fill(color)
 
     def get_board_pos(self) -> BoardPos:
