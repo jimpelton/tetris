@@ -1,4 +1,3 @@
-# from sys import exit
 from dataclasses import dataclass
 from typing import Callable, ClassVar, Dict,  Final
 import logging
@@ -15,21 +14,40 @@ logger = logging.getLogger(__name__)
 FPS: Final[int] = 60
 DEFAULT_DOWN_SPEED_MS: Final[int] = 1000
 
-@dataclass
+
 class Score:
-    total_lines: int = 0
-    level: int = 0
-    points: int = 0
+    def __init__(self) -> None:
+        self._total_lines: int = 0
+        self._level: int = 0
+        self._points: int = 0
+
+    @property
+    def total_lines(self) -> int:
+        return self._total_lines
+
+    @property
+    def level(self) -> int:
+        return self._level
+
+    @property
+    def points(self) -> int:
+        return self._points
 
     def add_lines(self, n: int) -> int:
         """Add n lines to the total and compute score.
 
         Returns total lines
         """
-        self.total_lines += n
-        self.level = int((self.total_lines / 10)) + 1
-        self.points += self.level * n
-        return self.total_lines
+        self._total_lines += n
+        self._level = int((self._total_lines / 10)) + 1
+        self._points += self._level * n
+        return self._total_lines
+
+    def __str__(self) -> str:
+        return f"Score(lines={self._total_lines}, level={self._level}, points={self._points})"
+
+    def __repr__(self) -> str:
+        return f"Score(total_lines={self._total_lines}, level={self._level}, points={self._points})"
 
 
 class Tetris:
@@ -149,4 +167,3 @@ class Tetris:
 
             pg.display.flip()
             self.since_last_down_move += since_last_tick
-
